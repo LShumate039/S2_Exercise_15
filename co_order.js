@@ -35,6 +35,15 @@ window.addEventListener("load", function () {
 
       //caluate the cost of the order 
       calcOrder();
+
+      //event handlers for the web form 
+      orderForm.elements.model.onchange = calcOrder;
+      orderForm.elements.qty.onchange = calcOrder;
+
+      var planOptions = document.querySelectorAll('input[name="protection"]');
+      for (var i = 0; i < planOptions.length; i++) {
+            planOptions[i].onclick = calcOrder;
+      }
 });
 
 function calcOrder() {
@@ -47,17 +56,36 @@ function calcOrder() {
 
       //initial cost = model * quantity
       var initialCost = mCost * quantity;
-      orderForm.elements.initialCost.value = initialCost;
+      orderForm.elements.initialCost.value = formatUSACurrency(initialCost);
 
       // retrieve the cost of the user's protection plan 
       var pCost = document.querySelector('input[name="protection"]:checked').value * quantity;
-      orderForm.elements.protectionCost.value = pCost;
+      orderForm.elements.protectionCost.value = formatNumber(pCost, 2);
 
-      orderForm.elements.subtotal.value = initialCost + pCost;
+      orderForm.elements.subtotal.value = formatNumber(initialCost + pCost, 2);
 
       var salesTax = 0.05 * (initialCost + pCost);
-      orderForm.elements.salesTax.value = salesTax;
+      orderForm.elements.salesTax.value = formatNumber(salesTax, 2);
 
       var totalCost = initialCost + pCost + salesTax;
-      orderForm.elements.totalCost.value = totalCost;
+      orderForm.elements.totalCost.value = formatNumber(totalCost, 2);
+
+      orderForm.elements.modelName.value = orderForm.elements.model.options[mIndex].text;
+
+      orderForm.elements.protectionName.value = document.querySelector('input[name="protection"]:checked').nextSibling.nodeValue;
+}
+
+function formatNumber(val, decimals) {
+      return val.toLocaleString(undefined, {
+            minimumFractionDigits: decimals,
+            maximumFractionDigits: decimals
+      });
+}
+
+
+function formatUSACurrency(val) {
+      return val.toLocaleString('en-US', {
+            style: "currency",
+            currency: "USD"
+      });
 }
